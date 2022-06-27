@@ -1,0 +1,33 @@
+// @function
+// boxShadowGenerator(){
+//     $val: 0em 0em black;
+//     @for $i from 0 through 8{
+//         @for $j from 0 through 16{
+//             $shadowColor: red;
+//             @if $i==1 and $j==1 or $i==1 and $j==15 or $i==7 and $j==15 or $i==7 and $j==1{
+//                 $shadowColor:white;
+//             }
+//             @else if $i>=2 and $i<=6 and $j==0 or $i==0 and $j>=2 and $j<=14 or $i==8 and $j>=2 and $j<=14 or $i>=2 and $i<=6 and $j==16 or $i==2 and $j>=3 and $j<=1{
+//                 $shadowColor: white;
+//             }
+//             @else if $i<=1 and $j<=1 or $i<=1 and $j>=15 or $i>=7 and $j>=15 or $i>=7 and $j<=1{
+//                 $shadowColor: rgba(0, 0, 0, 0);
+//             }
+//             @else{
+//                 $shadowColor: #E51C75;
+//             }
+//             $val: #{$val} ,#{$j}em #{$i}em $shadowColor;
+//         }
+//     }
+//     @return $val;
+// }
+
+// @function properBoxShadowGenerator($pixelSize, $height, $width){
+//     $boxShadowVal:0px 0px black;
+//     @for $i from 0 through $height{
+//         @for $j from 0 through $width{
+//             $boxShadowVal: #{$boxShadowVal}, #{$pixelSize*$j}px #{$pixelSize*$i}px 0 0 black;
+//         }
+//     }
+//     @return $boxShadowVal;
+// }
