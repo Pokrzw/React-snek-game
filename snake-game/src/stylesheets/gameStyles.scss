@@ -1,0 +1,26 @@
+.FullBoard{
+    outline: 10px solid white;
+    width: 400px;
+    height: 400px;
+    padding: none;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.block{
+    width: 20px;
+    height: 20px;
+    margin: 0;
+}
+.apple{
+    background-color: #fd0090;
+}
+
+.snake{
+    background-color: #EA6620;
+    outline: 1px solid #8d390b;
+}
+
+.floorTile{
+    outline: 1px solid rgba(255, 255, 255, 0.356);
+}

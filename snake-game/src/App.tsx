@@ -1,15 +1,26 @@
 import React from 'react';
 import './stylesheets/globalstyles.scss'
-import'./stylesheets/app.scss'
+import './stylesheets/app.scss'
 import MainTitle from './modules/mainTitle/MainTitle';
+import NameInput from './modules/nameInput/NameInput';
+import GameEnv from './modules/gameScreen/GameEnv';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <div className="App">
+
+     <div className="App">
       <div className="display">
-    <MainTitle/>
+        <BrowserRouter>
+          <Routes>
+            <Route path='/' element={<MainTitle />} />
+            <Route path='/start_game' element={<NameInput />} />
+            <Route path='/game' element={<GameEnv />} />
+          </Routes>
+        </BrowserRouter>
       </div>
     </div>
+
   );
 }
 
