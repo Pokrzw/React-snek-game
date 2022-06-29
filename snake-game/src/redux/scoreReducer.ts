@@ -1,6 +1,6 @@
 import { store } from "./store"
 
-interface Score{
+export interface Score{
     id: number,
     nick: string, 
     score: number
