@@ -45,3 +45,12 @@
         }
     
 }
+
+@media screen and (max-width: 550px){
+    .scoreBoard{
+        button{
+            padding: 2px 5px;
+            font-size: 1rem;
+        }
+    }
+}

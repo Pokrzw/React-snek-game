@@ -8,7 +8,7 @@
     align-items: center;
 
     h1 {
-        font-size: 150px;
+        font-size: 5em;
     }
 
     h3 {
@@ -28,7 +28,38 @@
 
 }
 
+@media screen and (max-width: 750px) {
+    .buttons{
+        .button:first-child{
+            margin-right: 0;
+
+        }
+
+        button{
+            font-size: 2rem;
+        }
+    }
+}
 
 
 
+@media screen and (max-width: 550px) {
+    .MainTitle{
+        h1{
+            margin-bottom: 10px;
+        }
+        h3{
+            font-size: 1rem;
+        }
+    }
+    .buttons{
 
+        width: fit-content;
+        height: fit-content;
+
+        button{
+            font-size: 1em;
+            padding: 2px 35px;
+        }
+    }
+}

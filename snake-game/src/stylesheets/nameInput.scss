@@ -46,7 +46,9 @@ Form{
             }
         }
     }
-
+.buttons{
+    display: flex;
+}
     button:first-child{
         margin-right: 40px;
     }

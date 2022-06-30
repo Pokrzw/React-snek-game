@@ -53,109 +53,115 @@ const FullBoard = () => {
     const [gameNotOver, setGameNotOver] = useState<boolean>(true);
     const dispatch = useDispatch()
     const [causeOfDeath, setCauseOfDeath] = useState<string>('');
-   
+
     const requestRef: any = useRef()
-    const previousTimeRef = useRef()
     let newGameState = gameState
-    const moveSpeed = 1200 * (0.8 ** (newGameState.speed))
+    let moveSpeed = 500 * (0.8 ** (newGameState.speed))
     const reset = () => {
         newGameState = { ...gameState }
         setGameNotOver(true)
     }
     const gameloop = (time: any) => {
         setTimeout(() => {
-            if (previousTimeRef.current !== undefined) {
-                const deltaTime = time - previousTimeRef.current
-            }
-            const snakeMove = move(newGameState.curDir, newGameState.snakeCoordinates)
-            if (snakeMove[0].x < 0) {
-                setCauseOfDeath('Your snake crashed into the wall...')
-                setGameNotOver(false)
-            }
-            else if (checkCollision(gameState.snakeCoordinates)) {
-                setCauseOfDeath('Your snake ate itself...')
-                setGameNotOver(false)
-            }
-            else {
-                newGameState.snakeCoordinates = move(newGameState.curDir, newGameState.snakeCoordinates)
+            
+                const snakeMove = move(newGameState.curDir, newGameState.snakeCoordinates)
                 const snakeHeadCords: coordinates = newGameState.snakeCoordinates[newGameState.snakeCoordinates.length - 1]
-                if (CheckForApple(snakeHeadCords, newGameState.appleCoordinates)) {
-                    newGameState.points++;
-                    setPoints(newGameState.points)
-                    newGameState.snakeCoordinates.unshift(expandSnake(newGameState.snakeCoordinates))
-                    newGameState.appleCoordinates = generateRandomCords()
-                    newGameState.speed = Math.floor(newGameState.points / 5)
+                if (snakeMove[0].x < 0 && gameNotOver) {
+                    setCauseOfDeath('Your snake crashed into the wall...')
+                    setGameNotOver(false)
                 }
-                if (CheckForApple(snakeHeadCords, newGameState.mineCoordinates)) {
+                else if (checkCollision(newGameState.snakeCoordinates) && gameNotOver) {
+                    console.log(new Set(newGameState.snakeCoordinates.map((x:any) => `${x.y}.${x.x}`)));
+                    console.log(newGameState.snakeCoordinates.map((x:any) => `${x.y}.${x.x}`));
+                    
+                    setCauseOfDeath('Your snake ate itself...')
+                    setGameNotOver(false)
+                }
+                else if (CheckForApple(snakeHeadCords, newGameState.mineCoordinates) && gameNotOver) {
                     setCauseOfDeath('Your snake exploded...')
                     setGameNotOver(false)
                 }
-            }
+                else {
+                    newGameState.snakeCoordinates = move(newGameState.curDir, newGameState.snakeCoordinates)
+                    if (CheckForApple(snakeHeadCords, newGameState.appleCoordinates)) {
+    
+                        newGameState.points++;
+                        setPoints(newGameState.points)
+                        newGameState.snakeCoordinates.unshift(expandSnake(newGameState.snakeCoordinates, newGameState.curDir))
+                        newGameState.appleCoordinates = generateRandomCords()
+                        newGameState.speed = Math.floor(newGameState.points / 5)
+                         moveSpeed = 500 * (0.8 ** (newGameState.speed))
+                    }
+                   
+                }
 
-            setBoard(createBoard(newGameState.mineCoordinates, newGameState.appleCoordinates, newGameState.snakeCoordinates))
+                setBoard(createBoard(newGameState.mineCoordinates, newGameState.appleCoordinates, newGameState.snakeCoordinates))
+                requestRef.current = requestAnimationFrame(gameloop)
+            
 
-            previousTimeRef.current = time
-            requestRef.current = requestAnimationFrame(gameloop)
         }, moveSpeed)
 
     }
-    
+
     useEffect(() => {
         reset()
-        if (gameNotOver) {
-            window.addEventListener('keydown', (e) => {
-                newGameState.curDir = changeDirection(e)
-            });
-            setInterval(() => {
-                const newAppleCords = generateRandomCords()
-                const newMineCords = generateRandomCords()
-                newGameState.mineCoordinates = newMineCords
-                newGameState.appleCoordinates = newAppleCords
 
-            }, 10000)
-            requestRef.current = requestAnimationFrame(gameloop);
-            return () => cancelAnimationFrame(requestRef.current)
-        }
+        window.addEventListener('keydown', (e) => {
+            newGameState.curDir = changeDirection(e)
+        });
+        setInterval(() => {
+            const newAppleCords = generateRandomCords()
+            const newMineCords = generateRandomCords()
+            newGameState.mineCoordinates = newMineCords
+            newGameState.appleCoordinates = newAppleCords
+
+        }, 10000)
+        requestRef.current = requestAnimationFrame(gameloop);
+        return () => cancelAnimationFrame(requestRef.current)
+
     }, []);
- 
-    
-        return (
-            <div className="container">
-                {board.length!==0 ?
+
+
+    return (
+        <div className="container">
+            {board.length !== 0 ?
                 <div className='arcade'>
-                <p>SCORE: {points}</p>
-                {gameNotOver ?
-                    <div className="FullBoard">
-                        {board.map((block) => {
-                            return (
-                                <BoardCell key={`${block.coordinates.x}.${block.coordinates.y}`} id={`${block.coordinates.x}.${block.coordinates.y}`} coordinates={block.coordinates} category={block.category} />
-    
-                            )
-                        })}
-                    </div>
-    
-                    :
-                    <div className="gameOverScreen">
-                        <h1>GAME OVER</h1>
-                        <p>{causeOfDeath}</p>
-                        <button className='button' onClick={() => {
-                            dispatch({ type: "EDIT_SCORE", payload: { id: curPlayerid, score: points } })
-                            navigate('/')
-                        }}>MAIN MENU</button>
-    
-    
-                    </div>
-    
-                }
-            </div>
+                    <p>SCORE: {points}</p>
+                    {gameNotOver ?
+                        <div className="FullBoard">
+                            {board.map((block) => {
+                                return (
+                                    <BoardCell key={`${block.coordinates.x}.${block.coordinates.y}`} id={`${block.coordinates.x}.${block.coordinates.y}`} coordinates={block.coordinates} category={block.category} />
+
+                                )
+                            })}
+                        </div>
+
+                        :
+                        <div className="gameOverScreen">
+                            <div className="gameOver">
+                            <h1>GAME</h1>
+                            <h1>OVER</h1>
+                            </div>
+                            <p>{causeOfDeath}</p>
+                            <button className='button' onClick={() => {
+                                dispatch({ type: "EDIT_SCORE", payload: { id: curPlayerid, score: points } })
+                                navigate('/')
+                            }}>MAIN MENU</button>
+
+
+                        </div>
+
+                    }
+                </div>
                 :
 
                 <div className="arcade">LOADING...</div>
-                }
-            </div>
-        );
-    }
-    
-    
+            }
+        </div>
+    );
+}
+
+
 
 export default FullBoard;

@@ -8,13 +8,16 @@ interface block {
     coordinates: coordinates,
     category: string
 }
+export const generateRandomCords = (): coordinates => {
+    return {
+        y: Math.floor(Math.random() * (20 - 2) + 1),
+        x: Math.floor(Math.random() * (20 - 2) + 1)
+    }
+}
 
 export const gameState = {
     snakeCoordinates: [{ y: 0, x: 0 }],
-    appleCoordinates: {
-        y: 10,
-        x: 10,
-    },
+    appleCoordinates: generateRandomCords(),
     mineCoordinates: {
         y: 18,
         x: 18,
@@ -24,21 +27,75 @@ export const gameState = {
     curDir: 'RIGHT'
 }
 
-export const expandSnake = (snakeCords: coordinates[]): coordinates => {
-    const tail = snakeCords[0]
-    const newTail: coordinates = { y: tail.y - 1, x: tail.x }
-    return newTail
+export const checkCollision = (snakeCords: coordinates[]): boolean => {
+    return new Set(snakeCords.map(x => `${x.y}.${x.x}`)).size !== snakeCords.map(x => `${x.x}.${x.y}`).length
 }
+
+export const expandSnake = (snakeCords: coordinates[], curentDir: string): coordinates => {
+    const tail = snakeCords[0]
+    let newTail: coordinates = { x: 0, y: 0 };
+    switch (curentDir) {
+
+        case 'RIGHT':
+            if (tail.y > 0) {
+                newTail = { y: tail.y - 1, x: tail.x }
+            } else {
+                if (tail.x < 20) {
+                    newTail = { y: tail.y, x: tail.x + 1 }
+                } else {
+                    newTail = { y: tail.y, x: tail.x - 1 }
+                }
+            }
+            break;
+        case 'LEFT':
+            if (snakeCords[0].y < 20) {
+                newTail = { y: tail.y + 1, x: tail.x }
+            } else {
+                if (snakeCords[0].x < 20) {
+                    newTail = { y: tail.y, x: tail.x + 1 }
+                } else {
+                    newTail = { y: tail.y, x: tail.x - 1 }
+                }
+            }
+            break;
+        case 'UP':
+            if (snakeCords[0].x > 0) {
+                newTail = { y: tail.y, x: tail.x + 1 }
+            } else {
+                if (snakeCords[0].y < 20) {
+                    newTail = { y: tail.y + 1, x: tail.x }
+                } else {
+                    newTail = { y: tail.y - 1, x: tail.x }
+                }
+            }
+            break;
+        case 'DOWN':
+            if (snakeCords[0].x < 20) {
+                newTail = { y: tail.y, x: tail.x - 1 }
+            } else {
+                if (snakeCords[0].y < 20) {
+                    newTail = { y: tail.y + 1, x: tail.x + 1 }
+                } else {
+                    newTail = { y: tail.y - 1, x: tail.x - 1 }
+                }
+            }
+            break;
+
+    }
+
+    return newTail;
+}
+
 export const move = (direction: string, snakeCords: coordinates[]): coordinates[] => {
     let newSnakePositions: coordinates[] = [];
     if (snakeCords.length === 1) {
         switch (direction) {
             case 'RIGHT':
-                if (snakeCords[0].y < 20) { 
-                    newSnakePositions.unshift({ ...snakeCords[0], y: snakeCords[0].y + 1})
+                if (snakeCords[0].y < 20) {
+                    newSnakePositions.unshift({ ...snakeCords[0], y: snakeCords[0].y + 1 })
                 }
                 else { return [{ y: -1, x: -1 }] }
-                
+
                 break;
             case 'LEFT':
                 if (snakeCords[0].y > 0) { newSnakePositions.unshift({ ...snakeCords[0], y: snakeCords[0].y - 1 }) }
@@ -100,18 +157,10 @@ export const changeDirection = (e: any): string => {
     }
 }
 
-export const checkCollision = (snakeCords: coordinates[]): boolean => {
-    return new Set(snakeCords.map(x => `${x.y}.${x.x}`)).size !== snakeCords.map(x => `${x.x}.${x.y}`).length
-}
+
 
 export const CheckForApple = (snakeHead: coordinates, apple: coordinates): boolean => {
     return (snakeHead.x === apple.x) && (snakeHead.y === apple.y)
 }
 
-export const generateRandomCords = (): coordinates => {
-    return {
-        y: Math.floor(Math.random() * (20 - 2) + 1),
-        x: Math.floor(Math.random() * (20 - 2) + 1)
-    }
-}
 
