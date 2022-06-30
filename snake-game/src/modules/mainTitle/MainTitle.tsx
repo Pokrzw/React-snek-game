@@ -4,13 +4,17 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { store } from "../../redux/store";
 import { scoreState } from "../../redux/scoreReducer";
+import React from 'react';
 import { useEffect } from 'react';
 const MainTitle = () => {
+
     const navigate = useNavigate()
     const scores = useSelector<scoreState, scoreState['scoreboard']>((state) => state.scoreboard)
     useEffect(() => {
-        
-        setHiscore(scores.sort((a, b) => b.score - a.score)[0].score)
+        if(scores.length!==0)
+        {
+            setHiscore(scores.sort((a, b) => b.score - a.score)[0].score)
+        }
     }, []);
 
 

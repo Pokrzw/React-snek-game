@@ -12,8 +12,12 @@ interface block {
 export const gameState = {
     snakeCoordinates: [{ y: 0, x: 0 }],
     appleCoordinates: {
-        x: Math.floor(Math.random() * (20 - 2) + 1),
-        y: Math.floor(Math.random() * (20 - 2) + 1)
+        y: 10,
+        x: 10,
+    },
+    mineCoordinates: {
+        y: 18,
+        x: 18,
     },
     speed: 0,
     points: 0,
@@ -22,7 +26,7 @@ export const gameState = {
 
 export const expandSnake = (snakeCords: coordinates[]): coordinates => {
     const tail = snakeCords[0]
-    const newTail: coordinates = { x: tail.x - 1, y: tail.y }
+    const newTail: coordinates = { y: tail.y - 1, x: tail.x }
     return newTail
 }
 export const move = (direction: string, snakeCords: coordinates[]): coordinates[] => {
@@ -30,20 +34,23 @@ export const move = (direction: string, snakeCords: coordinates[]): coordinates[
     if (snakeCords.length === 1) {
         switch (direction) {
             case 'RIGHT':
-                if (snakeCords[0].y < 20) { newSnakePositions.unshift({ ...snakeCords[0], y: snakeCords[0].y + 1 }) }
-                else { return [{ x: -1, y: -1 }] }
+                if (snakeCords[0].y < 20) { 
+                    newSnakePositions.unshift({ ...snakeCords[0], y: snakeCords[0].y + 1})
+                }
+                else { return [{ y: -1, x: -1 }] }
+                
                 break;
             case 'LEFT':
-                if (snakeCords[0].y < 20) { newSnakePositions.unshift({ ...snakeCords[0], y: snakeCords[0].y - 1 }) }
-                else { return [{ x: -1, y: -1 }] }
+                if (snakeCords[0].y > 0) { newSnakePositions.unshift({ ...snakeCords[0], y: snakeCords[0].y - 1 }) }
+                else { return [{ y: -1, x: -1 }] }
                 break;
             case 'UP':
                 if (snakeCords[0].x > 0) { newSnakePositions.unshift({ ...snakeCords[0], x: snakeCords[0].x - 1 }) }
-                else { return [{ x: -1, y: -1 }] }
+                else { return [{ y: -1, x: -1 }] }
                 break;
             case 'DOWN':
                 if (snakeCords[0].x < 20) { newSnakePositions.unshift({ ...snakeCords[0], x: snakeCords[0].x + 1 }) }
-                else { return [{ x: -1, y: -1 }] }
+                else { return [{ y: -1, x: -1 }] }
                 break;
         }
         return newSnakePositions
@@ -56,7 +63,6 @@ export const move = (direction: string, snakeCords: coordinates[]): coordinates[
                     case 'RIGHT':
                         if (snakeCords[head].y < 20) { newSnakePositions.unshift({ ...snakeCords[head], y: snakeCords[head].y + 1 }) }
                         else { return [{ x: -1, y: -1 }] }
-
                         break;
                     case 'LEFT':
                         if (snakeCords[head].y > 0) { newSnakePositions.unshift({ ...snakeCords[head], y: snakeCords[head].y - 1 }) }
@@ -95,7 +101,7 @@ export const changeDirection = (e: any): string => {
 }
 
 export const checkCollision = (snakeCords: coordinates[]): boolean => {
-    return new Set(snakeCords.map(x => `${x.x}.${x.y}`)).size !== snakeCords.map(x => `${x.x}.${x.y}`).length
+    return new Set(snakeCords.map(x => `${x.y}.${x.x}`)).size !== snakeCords.map(x => `${x.x}.${x.y}`).length
 }
 
 export const CheckForApple = (snakeHead: coordinates, apple: coordinates): boolean => {
@@ -104,8 +110,8 @@ export const CheckForApple = (snakeHead: coordinates, apple: coordinates): boole
 
 export const generateRandomCords = (): coordinates => {
     return {
-        x: Math.floor(Math.random() * (20 - 2) + 1),
-        y: Math.floor(Math.random() * (20 - 2) + 1)
+        y: Math.floor(Math.random() * (20 - 2) + 1),
+        x: Math.floor(Math.random() * (20 - 2) + 1)
     }
 }
 

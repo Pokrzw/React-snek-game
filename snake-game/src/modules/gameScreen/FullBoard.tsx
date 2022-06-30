@@ -1,7 +1,7 @@
 import '../../stylesheets/gameStyles.scss'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import '../../stylesheets/globalstyles.scss'
-import { gameState, generateRandomCords, move, changeDirection, checkCollision, CheckForApple, expandSnake } from './gameloop'
+import { generateRandomCords, move, changeDirection, checkCollision, CheckForApple, expandSnake, gameState } from './gameloop'
 import BoardCell from './BoardCell'
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigator, useNavigate } from 'react-router-dom'
@@ -11,40 +11,32 @@ const FullBoard = () => {
 
     const scores = useSelector<scoreState, scoreState['scoreboard']>((state) => state.scoreboard)
     const navigate = useNavigate();
-    const curPlayerid = scores[scores.length-1].id
+    const [points, setPoints] = useState<number>(0);
+    const curPlayerid = scores[scores.length - 1].id
 
     interface coordinates {
         x: number,
         y: number
     }
 
+    interface gameState { snakeCoordinates: { y: number; x: number; }[]; appleCoordinates: { y: number; x: number; }; speed: number; points: number; curDir: string; }
     interface block {
         id: string,
         coordinates: coordinates,
         category: string
     }
 
-    
-    const resetGame = () => {
-        gameState.snakeCoordinates = [{ y: 0, x: 0 }]
-        gameState.appleCoordinates = {
-            x: Math.floor(Math.random() * (20 - 2) + 1),
-            y: Math.floor(Math.random() * (20 - 2) + 1)
-        }
 
-        gameState.speed = 0
-        gameState.points = 0
-        gameState.curDir = 'RIGHT'
-        setGameNotOver(true)
-
-    }
-    const createBoard = (applecords: coordinates, snakeCoords: coordinates[]): block[] => {
+    const createBoard = (bombcords: coordinates, applecords: coordinates, snakeCoords: coordinates[]): block[] => {
         let board: block[] = []
         for (let i = 0; i < 20; i++) {
             for (let j = 0; j < 20; j++) {
-                let curBlock: block = { id: `${j}.${i}`, coordinates: { x: j, y: i }, category: 'floorTile' }
+                let curBlock: block = { id: `${j}.${i}`, coordinates: { y: j, x: i }, category: 'floorTile' }
                 if (i === applecords.x && j === applecords.y) {
                     curBlock.category = 'apple'
+                }
+                if (i === bombcords.x && j === bombcords.y) {
+                    curBlock.category = 'bomb'
                 }
                 snakeCoords.map((cordSet: coordinates) => {
                     if (i === cordSet.x && j === cordSet.y) {
@@ -57,77 +49,113 @@ const FullBoard = () => {
         return board
     }
 
-
-
     const [board, setBoard] = useState<block[]>([]);
     const [gameNotOver, setGameNotOver] = useState<boolean>(true);
     const dispatch = useDispatch()
-    const moveSpeed = 1500*(0.8**(gameState.speed))
-
-    useEffect(() => {
-        const initialAppleCords = generateRandomCords()
-        gameState.appleCoordinates = initialAppleCords
-        setBoard(createBoard(gameState.appleCoordinates, gameState.snakeCoordinates))
-
-    }, [gameNotOver]);
-
-    useEffect(() => {
-
-        window.addEventListener('keydown', (e) => {
-            gameState.curDir = changeDirection(e)
-        });
-
-
-        setInterval(
-            () => {
-                const snakeMove = move(gameState.curDir, gameState.snakeCoordinates)
-                if (snakeMove[0].x < 0 || checkCollision(gameState.snakeCoordinates)) { setGameNotOver(false) } 
-                else {
-
-                    gameState.snakeCoordinates = move(gameState.curDir, gameState.snakeCoordinates)
-                    setBoard(createBoard(gameState.appleCoordinates, gameState.snakeCoordinates))
-//KTORAS FUNKCJA Z JAKIEGOS POWODU WYWOLUJE SIE DWA RAZY - NAPRAWIC TO PRZESTANIE KLATKOWAC!!
-                    const snakeHeadCords: coordinates = gameState.snakeCoordinates[gameState.snakeCoordinates.length - 1]
-                    if (CheckForApple(snakeHeadCords, gameState.appleCoordinates)) {
-                        gameState.points++;
-                        gameState.snakeCoordinates.unshift(expandSnake(gameState.snakeCoordinates))
-                        gameState.appleCoordinates = generateRandomCords()
-                        gameState.speed = Math.floor(gameState.points/5)
-                    }
-
+    const [causeOfDeath, setCauseOfDeath] = useState<string>('');
+   
+    const requestRef: any = useRef()
+    const previousTimeRef = useRef()
+    let newGameState = gameState
+    const moveSpeed = 1200 * (0.8 ** (newGameState.speed))
+    const reset = () => {
+        newGameState = { ...gameState }
+        setGameNotOver(true)
+    }
+    const gameloop = (time: any) => {
+        setTimeout(() => {
+            if (previousTimeRef.current !== undefined) {
+                const deltaTime = time - previousTimeRef.current
+            }
+            const snakeMove = move(newGameState.curDir, newGameState.snakeCoordinates)
+            if (snakeMove[0].x < 0) {
+                setCauseOfDeath('Your snake crashed into the wall...')
+                setGameNotOver(false)
+            }
+            else if (checkCollision(gameState.snakeCoordinates)) {
+                setCauseOfDeath('Your snake ate itself...')
+                setGameNotOver(false)
+            }
+            else {
+                newGameState.snakeCoordinates = move(newGameState.curDir, newGameState.snakeCoordinates)
+                const snakeHeadCords: coordinates = newGameState.snakeCoordinates[newGameState.snakeCoordinates.length - 1]
+                if (CheckForApple(snakeHeadCords, newGameState.appleCoordinates)) {
+                    newGameState.points++;
+                    setPoints(newGameState.points)
+                    newGameState.snakeCoordinates.unshift(expandSnake(newGameState.snakeCoordinates))
+                    newGameState.appleCoordinates = generateRandomCords()
+                    newGameState.speed = Math.floor(newGameState.points / 5)
+                }
+                if (CheckForApple(snakeHeadCords, newGameState.mineCoordinates)) {
+                    setCauseOfDeath('Your snake exploded...')
+                    setGameNotOver(false)
                 }
             }
-            , 2000)
+
+            setBoard(createBoard(newGameState.mineCoordinates, newGameState.appleCoordinates, newGameState.snakeCoordinates))
+
+            previousTimeRef.current = time
+            requestRef.current = requestAnimationFrame(gameloop)
+        }, moveSpeed)
+
+    }
+    
+    useEffect(() => {
+        reset()
+        if (gameNotOver) {
+            window.addEventListener('keydown', (e) => {
+                newGameState.curDir = changeDirection(e)
+            });
+            setInterval(() => {
+                const newAppleCords = generateRandomCords()
+                const newMineCords = generateRandomCords()
+                newGameState.mineCoordinates = newMineCords
+                newGameState.appleCoordinates = newAppleCords
+
+            }, 10000)
+            requestRef.current = requestAnimationFrame(gameloop);
+            return () => cancelAnimationFrame(requestRef.current)
+        }
     }, []);
-
-    return (
-        <div className='arcade'>
-            <p>SCORE: {gameState.points}</p>
-            {gameNotOver ?
-                <div className="FullBoard">
-                    {board.map((block) => {
-                        return (
-                            <BoardCell key={`${block.coordinates.x}.${block.coordinates.y}`} id={`${block.coordinates.x}.${block.coordinates.y}`} coordinates={block.coordinates} category={block.category} />
-
-                        )
-                    })}
-                </div>
-
-                :
-                <div className="gameOverScreen">
-                    <h1>GAME OVER</h1>
-                    <button className='button' onClick={() => { 
-                        dispatch({type:"EDIT_SCORE", payload:{id:curPlayerid,score:gameState.points }})
-                        resetGame()
-                        navigate('/') 
+ 
+    
+        return (
+            <div className="container">
+                {board.length!==0 ?
+                <div className='arcade'>
+                <p>SCORE: {points}</p>
+                {gameNotOver ?
+                    <div className="FullBoard">
+                        {board.map((block) => {
+                            return (
+                                <BoardCell key={`${block.coordinates.x}.${block.coordinates.y}`} id={`${block.coordinates.x}.${block.coordinates.y}`} coordinates={block.coordinates} category={block.category} />
+    
+                            )
+                        })}
+                    </div>
+    
+                    :
+                    <div className="gameOverScreen">
+                        <h1>GAME OVER</h1>
+                        <p>{causeOfDeath}</p>
+                        <button className='button' onClick={() => {
+                            dispatch({ type: "EDIT_SCORE", payload: { id: curPlayerid, score: points } })
+                            navigate('/')
                         }}>MAIN MENU</button>
-                    
-                        
-                </div>
+    
+    
+                    </div>
+    
+                }
+            </div>
+                :
 
-            }
-        </div>
-    );
-}
+                <div className="arcade">LOADING...</div>
+                }
+            </div>
+        );
+    }
+    
+    
 
 export default FullBoard;

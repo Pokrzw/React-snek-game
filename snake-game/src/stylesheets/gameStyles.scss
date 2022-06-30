@@ -16,6 +16,10 @@
     background-color: #fd0090;
 }
 
+.bomb{
+    background-color: #57727c;
+}
+
 .snake{
     background-color: #EA6620;
     outline: 1px solid #8d390b;
@@ -34,6 +38,10 @@
         width: 600px;
         color: white;
         font-size: 10rem;
+        margin-bottom: 20px;
+    }
+    p{
+        margin-bottom: 30px;
     }
 }
 

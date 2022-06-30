@@ -6,35 +6,41 @@ import '../../stylesheets/scoreboard.scss'
 import { useNavigate } from "react-router-dom";
 
 const ScoreBoard = () => {
-    
+
     const navigate = useNavigate()
     const scores = useSelector<scoreState, scoreState['scoreboard']>((state) => state.scoreboard)
     useEffect(() => {
-        scores.sort((a, b) => b.score - a.score)
+        if (scores.length !== 0) {
+            scores.sort((a, b) => b.score - a.score)
+        }
     }, []);
 
-    return ( 
+    return (
         <div className="scoreBoard">
             <h1>SCORES</h1>
-            <p>
+            <div className="labels">
                 <p>NICK</p>
                 <p>SCORE</p>
-            </p>
+            </div>
             <ul>
-            {scores.map((score) => {
-                return(
-                    <li>
-                        <div>{score.nick}</div>
-                        <div className="dottedLine"></div>
-                        <div>{score.score}</div>
-                    </li>
-                )
-            })}
-         </ul>
+                {scores.map((score) => {
+                    return (
 
-         <button className="button smolButton" onClick={()=>{navigate('/')}}>BACK TO MAIN PAGE</button>
+                        <div key={score.id}>
+                            <li>
+                                <div>{score.nick}</div>
+                                <div className="dottedLine"></div>
+                                <div>{score.score}</div>
+                            </li>
+                        </div>
+
+                    )
+                })}
+            </ul>
+
+            <button className="button smolButton" onClick={() => { navigate('/') }}>BACK TO MAIN PAGE</button>
         </div>
-     );
+    );
 }
- 
+
 export default ScoreBoard;
