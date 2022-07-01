@@ -61,7 +61,7 @@ const FullBoard = () => {
         newGameState = { ...gameState }
         setGameNotOver(true)
     }
-    const gameloop = (time: any) => {
+    const gameloop = () => {
         setTimeout(() => {
             
                 const snakeMove = move(newGameState.curDir, newGameState.snakeCoordinates)
@@ -71,8 +71,6 @@ const FullBoard = () => {
                     setGameNotOver(false)
                 }
                 else if (checkCollision(newGameState.snakeCoordinates) && gameNotOver) {
-                    console.log(new Set(newGameState.snakeCoordinates.map((x:any) => `${x.y}.${x.x}`)));
-                    console.log(newGameState.snakeCoordinates.map((x:any) => `${x.y}.${x.x}`));
                     
                     setCauseOfDeath('Your snake ate itself...')
                     setGameNotOver(false)
@@ -88,9 +86,8 @@ const FullBoard = () => {
                         newGameState.points++;
                         setPoints(newGameState.points)
                         newGameState.snakeCoordinates.unshift(expandSnake(newGameState.snakeCoordinates, newGameState.curDir))
-                        newGameState.appleCoordinates = generateRandomCords()
                         newGameState.speed = Math.floor(newGameState.points / 5)
-                         moveSpeed = 500 * (0.8 ** (newGameState.speed))
+                        moveSpeed = 500 * (0.8 ** (newGameState.speed))
                     }
                    
                 }
@@ -111,11 +108,13 @@ const FullBoard = () => {
         });
         setInterval(() => {
             const newAppleCords = generateRandomCords()
+            newGameState.appleCoordinates = newAppleCords
+        }, 10000)
+
+        setInterval(()=>{
             const newMineCords = generateRandomCords()
             newGameState.mineCoordinates = newMineCords
-            newGameState.appleCoordinates = newAppleCords
-
-        }, 10000)
+        },30000)
         requestRef.current = requestAnimationFrame(gameloop);
         return () => cancelAnimationFrame(requestRef.current)
 

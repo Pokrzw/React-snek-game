@@ -27,9 +27,6 @@ export const gameState = {
     curDir: 'RIGHT'
 }
 
-export const checkCollision = (snakeCords: coordinates[]): boolean => {
-    return new Set(snakeCords.map(x => `${x.y}.${x.x}`)).size !== snakeCords.map(x => `${x.x}.${x.y}`).length
-}
 
 export const expandSnake = (snakeCords: coordinates[], curentDir: string): coordinates => {
     const tail = snakeCords[0]
@@ -155,6 +152,21 @@ export const changeDirection = (e: any): string => {
         case 'ArrowDown': return 'DOWN'
         default: return gameState.curDir
     }
+}
+
+export const checkCollision = (snakeCords: coordinates[]): boolean => {
+    const head = snakeCords[snakeCords.length - 1]
+    let answer = false;
+    const tail = [...snakeCords]
+    tail.pop()
+    if(tail){
+        tail.map((item:coordinates)=>{
+            if(item.x === head.x && item.y === head.y){
+                answer = true
+            }
+        })
+    }
+    return answer
 }
 
 
